@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30717.126
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsusAuraEffect", "AsusAuraEffect\AsusAuraEffect.csproj", "{646282CC-8875-4580-85EF-747E1A5E8C26}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuraEffectTests", "AuraEffectTests\AuraEffectTests.csproj", "{4D7A6EFE-3989-4050-ADBD-16DD79587ED7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{646282CC-8875-4580-85EF-747E1A5E8C26}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{646282CC-8875-4580-85EF-747E1A5E8C26}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{646282CC-8875-4580-85EF-747E1A5E8C26}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{646282CC-8875-4580-85EF-747E1A5E8C26}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D7A6EFE-3989-4050-ADBD-16DD79587ED7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D7A6EFE-3989-4050-ADBD-16DD79587ED7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D7A6EFE-3989-4050-ADBD-16DD79587ED7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D7A6EFE-3989-4050-ADBD-16DD79587ED7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6B2A1235-DC1F-4645-9078-2B79CA535147}
+	EndGlobalSection
+EndGlobal
