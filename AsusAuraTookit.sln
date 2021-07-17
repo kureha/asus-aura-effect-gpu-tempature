@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.30717.126
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsusAuraEffect", "AsusAuraEffect\AsusAuraEffect.csproj", "{646282CC-8875-4580-85EF-747E1A5E8C26}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuraEffectTests", "AuraEffectTests\AuraEffectTests.csproj", "{4D7A6EFE-3989-4050-ADBD-16DD79587ED7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsusAuraEffectTests", "AuraEffectTests\AsusAuraEffectTests.csproj", "{4D7A6EFE-3989-4050-ADBD-16DD79587ED7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
