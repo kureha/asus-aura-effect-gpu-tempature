@@ -93,10 +93,18 @@ namespace AsusAuraEffect
 
         private async void BtnGetGpuTempature_Click(object sender, RoutedEventArgs e)
         {
-            ILedOutput auraManager = new AsusAuraOutput();
+            ILedOutput auraManager = null;
+            try
+            {
+                auraManager = new AsusAuraOutput();
+            } catch (Exception ex)
+            {
+                MessageBox.Show($"ASUS Auraサービスの接続に失敗しました。エラーメッセージ : {ex.Message}", $"エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
             SpectreUtil spectreUtil = new SpectreUtil();
 
-            if (isActive == true)
+            if (isActive)
             {
                 // 起動中　→　停止処理を実施
                 isActive = false;
@@ -108,79 +116,82 @@ namespace AsusAuraEffect
                 // ラベルを起動中向けに変更
                 btnGetGpuTempature.Content = STR_END_MONITOR;
 
-                // モニタリング処理開始
-                using (IHardwareMonitor statusManager = new GpuMonitor())
+                // 異常発生時はメッセージで通知
+                try
                 {
-                    // 監視開始
-                    statusManager.Open();
-
-                    // 前回温度、色変化開始カラー、現状温度
-                    int beforeTemp = 0;
-                    int startColorIdx = 0;
-                    int nowTemp = 0;
-
-                    // 温度を取得し状態を確認
-                    float? rawTempValue = statusManager.GetValue();
-                    if (rawTempValue.HasValue == false)
+                    // モニタリング処理開始
+                    using (IHardwareMonitor statusManager = new GpuMonitor())
                     {
-                        // 失敗時は即死させる
-                        isActive = false;
+                        // 監視開始
+                        statusManager.Open();
 
-                        // 内容をフォームに反映
-                        WriteInfoToForm(STR_FAILED_MONITOR, COLOR_MAX, COLOR_MAX, COLOR_MAX);
-                    }
-                    else
-                    {
-                        // その他の時は処理続行
-                        isActive = true;
+                        // 前回温度、色変化開始カラー、現状温度
+                        int beforeTemp = 0;
+                        int startColorIdx = 0;
+                        int nowTemp = 0;
 
-                        // 前回温度と、前回の色インデックスを取得
-                        beforeTemp = (int)rawTempValue.Value;
-                        startColorIdx = spectreUtil.GetTempatureIndex(beforeTemp, minTempature, maxTempature);
-
-                        // 最初の1回目は強制的に色を変える
-                        auraManager.SetColor(spectreUtil.ColorList[startColorIdx].R, spectreUtil.ColorList[startColorIdx].G, spectreUtil.ColorList[startColorIdx].B);
-
-                        // 内容をフォームに反映
-                        WriteInfoToForm(rawTempValue.Value, spectreUtil.ColorList[startColorIdx].R, spectreUtil.ColorList[startColorIdx].G, spectreUtil.ColorList[startColorIdx].B);
-
-                        // 1回目の変更が終わったので待機
-                        Thread.Sleep(NUM_INTERVAL_MSEC);
-                    }
-
-                    // メイン処理ループ開始
-                    await Task.Run(() =>
-                    {
-                        while (isActive)
+                        // 温度を取得し状態を確認
+                        float? rawTempValue = statusManager.GetValue();
+                        if (rawTempValue.HasValue == false)
                         {
+                            // 失敗時は即死させる
+                            isActive = false;
+
+                            // 内容をフォームに反映
+                            WriteInfoToForm(STR_FAILED_MONITOR, COLOR_MAX, COLOR_MAX, COLOR_MAX);
+                        }
+                        else
+                        {
+                            // その他の時は処理続行
+                            isActive = true;
+
+                            // 前回温度と、前回の色インデックスを取得
+                            beforeTemp = (int)rawTempValue.Value;
+                            startColorIdx = spectreUtil.GetTempatureIndex(beforeTemp, minTempature, maxTempature);
+
+                            // 最初の1回目は強制的に色を変える
+                            auraManager.SetColor(spectreUtil.ColorList[startColorIdx].R, spectreUtil.ColorList[startColorIdx].G, spectreUtil.ColorList[startColorIdx].B);
+
+                            // 内容をフォームに反映
+                            WriteInfoToForm(rawTempValue.Value, spectreUtil.ColorList[startColorIdx].R, spectreUtil.ColorList[startColorIdx].G, spectreUtil.ColorList[startColorIdx].B);
+
+                            // 1回目の変更が終わったので待機
+                            Thread.Sleep(NUM_INTERVAL_MSEC);
+                        }
+
+                        // メイン処理ループ開始
+                        await Task.Run(() =>
+                        {
+                            while (isActive)
+                            {
                             // 温度を取得し状態を確認
                             rawTempValue = statusManager.GetValue();
-                            if (rawTempValue.HasValue == false)
-                            {
+                                if (rawTempValue.HasValue == false)
+                                {
                                 // 失敗時は即死させる
                                 isActive = false;
-                                continue;
-                            }
+                                    continue;
+                                }
 
                             // 現在の温度を取得
                             nowTemp = decimal.ToInt32(new decimal(rawTempValue.Value));
 
                             // 前回温度と今回温度の色情報を取得
                             int beforeIdx = spectreUtil.GetTempatureIndex(beforeTemp, minTempature, maxTempature);
-                            int nowIdx = spectreUtil.GetTempatureIndex(nowTemp, minTempature, maxTempature);
+                                int nowIdx = spectreUtil.GetTempatureIndex(nowTemp, minTempature, maxTempature);
 
-                            _logger.Debug($"温度変化を検知：{beforeTemp} -> {nowTemp}, [{beforeIdx} -> {nowIdx}]");
+                                _logger.Debug($"温度変化を検知：{beforeTemp} -> {nowTemp}, [{beforeIdx} -> {nowIdx}]");
 
                             // スペクトル変化用の色リストを計算
                             List<SpectreUtil.Color> colorList = spectreUtil.ChangeColor(
-                                spectreUtil.ColorList[beforeIdx],
-                                spectreUtil.ColorList[nowIdx],
-                                CHANGE_STEP_COUNT);
+                                    spectreUtil.ColorList[beforeIdx],
+                                    spectreUtil.ColorList[nowIdx],
+                                    CHANGE_STEP_COUNT);
 
                             // 色リストに対し描画を実施
                             _logger.Debug($"色変化開始：({colorList[0].R}, {colorList[0].G}, {colorList[0].B}) -> ({colorList[colorList.Count - 1].R}, {colorList[colorList.Count - 1].G}, {colorList[colorList.Count - 1].B})");
-                            foreach (SpectreUtil.Color color in colorList)
-                            {
+                                foreach (SpectreUtil.Color color in colorList)
+                                {
                                 // 色状態をASUS AURAに書き込み
                                 auraManager.SetColor(color.R, color.G, color.B);
 
@@ -189,13 +200,17 @@ namespace AsusAuraEffect
 
                                 // 指定時間待機
                                 Thread.Sleep(NUM_INTERVAL_MSEC);
-                            }
+                                }
 
                             // 前回温度を更新
                             beforeTemp = nowTemp;
-                        }
+                            }
 
-                    });
+                        });
+                    }
+                } catch (Exception ex)
+                {
+                    _ = MessageBox.Show($"GPU温度の取得に失敗しました。エラーメッセージ : {ex.Message}", $"エラー", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
 
                 // 終了後はラベルを待機中向けに変更
@@ -228,7 +243,7 @@ namespace AsusAuraEffect
         /// <param name="b"></param>
         private void WriteInfoToForm(float tempature, int r, int g, int b)
         {
-            lblGpuTempature.Content = $"GPU TEMP : {tempature.ToString()}";
+            lblGpuTempature.Content = $"GPU TEMP : {tempature}";
             Background = new SolidColorBrush(Color.FromRgb((byte)r, (byte)g, (byte)b));
         }
 
